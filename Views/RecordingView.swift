@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RecordingView: View {
     @Binding var driverName: String
@@ -34,6 +35,14 @@ struct RecordingView: View {
     
     private var distanceInKm: Double {
         totalDistance / 1000.0  // Convert meters to kilometers
+    }
+    
+    private func updateIdleTimer() {
+        if isRecording {
+            UIApplication.shared.isIdleTimerDisabled = true
+        } else {
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
     }
     
     var body: some View {
@@ -124,6 +133,18 @@ struct RecordingView: View {
             .padding()
         }
         .navigationTitle("Recording")
+        .onAppear {
+            updateIdleTimer()
+        }
+        .onDisappear {
+            // Only re-enable idle timer if we're not recording
+            if !isRecording {
+                UIApplication.shared.isIdleTimerDisabled = false
+            }
+        }
+        .onChange(of: isRecording) { _ in
+            updateIdleTimer()
+        }
         .onChange(of: isRecording) { newValue in
             if newValue {
                 startTimer()
