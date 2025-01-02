@@ -4,6 +4,7 @@ struct SessionsView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var sessions: [DrivingSession] = []
     @State private var selectedSessions: Set<UUID> = []
+    @State private var editMode: EditMode = .inactive
     @Environment(\.displayScale) private var displayScale
     
     var body: some View {
@@ -21,26 +22,51 @@ struct SessionsView: View {
                 } else {
                     ForEach(sessions) { session in
                         SessionRow(session: session)
+                            .contentShape(Rectangle())
+                            .onLongPressGesture {
+                                editMode = .active
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    deleteSessions([session.id])
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                Button {
+                                    shareSessions([session.id])
+                                } label: {
+                                    Label("Share", systemImage: "square.and.arrow.up")
+                                }
+                                .tint(.blue)
+                            }
                     }
                 }
             }
         }
         .navigationTitle("Sessions")
+        .environment(\.editMode, $editMode)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                EditButton()
-            }
-            
-            if !selectedSessions.isEmpty {
-                ToolbarItem(placement: .bottomBar) {
-                    HStack {
+                Menu {
+                    Button {
+                        withAnimation {
+                            editMode = editMode == .active ? .inactive : .active
+                            if editMode == .inactive {
+                                selectedSessions.removeAll()
+                            }
+                        }
+                    } label: {
+                        Label(editMode == .active ? "Done" : "Select Items", 
+                              systemImage: editMode == .active ? "checkmark.circle.fill" : "checkmark.circle")
+                    }
+                    
+                    if !selectedSessions.isEmpty {
                         Button(role: .destructive) {
                             deleteSessions(selectedSessions)
                         } label: {
                             Label("Delete Selected", systemImage: "trash")
                         }
-                        
-                        Spacer()
                         
                         Button {
                             shareSessions(selectedSessions)
@@ -48,6 +74,8 @@ struct SessionsView: View {
                             Label("Share Selected", systemImage: "square.and.arrow.up")
                         }
                     }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
