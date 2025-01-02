@@ -3,8 +3,6 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var sessions: [DrivingSession] = []
-    @State private var sessionToRename: DrivingSession?
-    @State private var newSessionName: String = ""
     
     var body: some View {
         List {
@@ -29,14 +27,6 @@ struct DashboardView: View {
                                 }
                                 
                                 Button {
-                                    sessionToRename = session
-                                    newSessionName = session.name
-                                } label: {
-                                    Label("Rename", systemImage: "pencil")
-                                }
-                                .tint(.orange)
-                                
-                                Button {
                                     shareSession(session)
                                 } label: {
                                     Label("Share", systemImage: "square.and.arrow.up")
@@ -50,24 +40,6 @@ struct DashboardView: View {
         .navigationTitle("Dashboard")
         .onAppear {
             loadSessions()
-        }
-        .sheet(item: $sessionToRename) { session in
-            NavigationStack {
-                Form {
-                    TextField("Session Name", text: $newSessionName)
-                }
-                .navigationTitle("Rename Session")
-                .navigationBarItems(
-                    leading: Button("Cancel") {
-                        sessionToRename = nil
-                    },
-                    trailing: Button("Save") {
-                        renameSession(session)
-                        sessionToRename = nil
-                    }
-                )
-            }
-            .presentationDetents([.height(200)])
         }
     }
     
@@ -116,17 +88,6 @@ struct DashboardView: View {
             print("Error deleting session: \(error)")
         }
     }
-    
-    private func renameSession(_ session: DrivingSession) {
-        do {
-            var updatedSession = session
-            updatedSession.name = newSessionName
-            try DataManager.shared.updateSession(updatedSession)
-            loadSessions()
-        } catch {
-            print("Error renaming session: \(error)")
-        }
-    }
 }
 
 struct StatCard: View {
@@ -149,13 +110,26 @@ struct StatCard: View {
 struct SessionRow: View {
     let session: DrivingSession
     
+    private var locationDescription: String {
+        let start = session.startLocation?.district ?? "Unknown"
+        let end = session.endLocation?.district ?? "Unknown"
+        return "\(start) → \(end)"
+    }
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(Date(timeIntervalSince1970: session.session_start), style: .date)
+                // Date and Time
+                Text(formattedDateTime)
                     .font(.headline)
                     .foregroundStyle(.primary)
                 
+                // Location info
+                Text(locationDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                // Stats
                 HStack {
                     Label(
                         String(format: "%.1f km", session.totalDistance / 1000),
@@ -174,6 +148,17 @@ struct SessionRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+    
+    private var formattedDateTime: String {
+        let date = Date(timeIntervalSince1970: session.session_start)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.timeStyle = .short
+        
+        return "\(dateFormatter.string(from: date)) at \(timeFormatter.string(from: date))"
     }
 }
 

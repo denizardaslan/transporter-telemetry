@@ -1,4 +1,5 @@
 import Foundation
+import CoreLocation
 
 struct DrivingSession: Codable, Identifiable {
     let id: UUID
@@ -8,10 +9,11 @@ struct DrivingSession: Codable, Identifiable {
     let data: [DrivingPoint]
     let tyreType: TyreType
     let driverName: String?
-    var name: String
+    let startLocation: LocationInfo?
+    let endLocation: LocationInfo?
     
     enum CodingKeys: String, CodingKey {
-        case id, session_id, session_start, session_end, data, tyreType, driverName, name
+        case id, session_id, session_start, session_end, data, tyreType, driverName, startLocation, endLocation
     }
     
     init(from decoder: Decoder) throws {
@@ -23,12 +25,19 @@ struct DrivingSession: Codable, Identifiable {
         data = try container.decode([DrivingPoint].self, forKey: .data)
         tyreType = try container.decode(TyreType.self, forKey: .tyreType)
         driverName = try container.decodeIfPresent(String.self, forKey: .driverName)
-        // If name doesn't exist in the saved data, create a default one
-        name = try container.decodeIfPresent(String.self, forKey: .name) ?? "Session \(session_id)"
+        startLocation = try container.decodeIfPresent(LocationInfo.self, forKey: .startLocation)
+        endLocation = try container.decodeIfPresent(LocationInfo.self, forKey: .endLocation)
     }
     
-    init(id: UUID = UUID(), session_id: Int, session_start: TimeInterval, session_end: TimeInterval? = nil, 
-         data: [DrivingPoint], tyreType: TyreType, driverName: String? = nil) {
+    init(id: UUID = UUID(), 
+         session_id: Int, 
+         session_start: TimeInterval, 
+         session_end: TimeInterval? = nil, 
+         data: [DrivingPoint], 
+         tyreType: TyreType, 
+         driverName: String? = nil,
+         startLocation: LocationInfo? = nil,
+         endLocation: LocationInfo? = nil) {
         self.id = id
         self.session_id = session_id
         self.session_start = session_start
@@ -36,7 +45,23 @@ struct DrivingSession: Codable, Identifiable {
         self.data = data
         self.tyreType = tyreType
         self.driverName = driverName
-        self.name = "Session \(session_id)"
+        self.startLocation = startLocation
+        self.endLocation = endLocation
+    }
+    
+    var name: String {
+        let date = Date(timeIntervalSince1970: session_start)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    var locationDescription: String? {
+        if let start = startLocation?.district, let end = endLocation?.district {
+            return "\(start) → \(end)"
+        }
+        return nil
     }
     
     var duration: TimeInterval {

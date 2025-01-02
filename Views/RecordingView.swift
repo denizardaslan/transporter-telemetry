@@ -15,6 +15,8 @@ struct RecordingView: View {
     @State private var previousSpeed: Double = 0
     @State private var hasRecordedData: Bool = false
     
+    @EnvironmentObject var locationManager: LocationManager
+    
     private var speedColor: Color {
         if currentSpeed < previousSpeed {
             return .red
@@ -84,8 +86,10 @@ struct RecordingView: View {
                 }
                 
                 // Recording Controls
-                if isRecording {
-                    Button(action: onStopRecording) {
+                if locationManager.isRecording {
+                    Button(action: {
+                        locationManager.stopRecording()
+                    }) {
                         Label("Stop Recording", systemImage: "stop.circle.fill")
                             .font(.title2)
                             .foregroundColor(.red)
@@ -93,8 +97,21 @@ struct RecordingView: View {
                             .background(.ultraThinMaterial)
                             .clipShape(Capsule())
                     }
+                } else if locationManager.isWaitingForLocation {
+                    Label("Getting Location...", systemImage: "location.circle")
+                        .font(.title2)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(Capsule())
+                        .overlay {
+                            ProgressView()
+                                .tint(.blue)
+                        }
                 } else {
-                    Button(action: onStartRecording) {
+                    Button(action: {
+                        locationManager.startRecording(driverName: driverName, tyreType: selectedTyreType)
+                    }) {
                         Label("Start Recording", systemImage: "record.circle")
                             .font(.title2)
                             .foregroundColor(.green)
