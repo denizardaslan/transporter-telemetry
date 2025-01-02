@@ -1,44 +1,52 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject private var locationManager: LocationManager
-    @State private var settings = try? DataManager.shared.loadSettings()
+    @StateObject private var locationManager = LocationManager()
+    @State private var selectedTab = 0
     @State private var showingSettings = false
+    @State private var driverName: String = UserDefaults.standard.string(forKey: "DriverName") ?? ""
+    @State private var selectedTyreType: TyreType = .summer
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                // Current speed display
-                Text(settings?.formatSpeed(locationManager.speed) ?? "0 km/h")
-                    .font(.system(size: 64, weight: .bold))
-                
-                // Recording controls
-                if locationManager.isRecording {
-                    Button(action: {
-                        locationManager.stopRecording()
-                    }) {
-                        Label("Stop Recording", systemImage: "stop.circle.fill")
-                            .font(.title)
-                            .foregroundColor(.red)
-                    }
-                } else {
-                    Button(action: {
-                        guard let settings = settings else { return }
+        NavigationStack {
+            TabView(selection: $selectedTab) {
+                RecordingView(
+                    driverName: $driverName,
+                    selectedTyreType: $selectedTyreType,
+                    isRecording: locationManager.isRecording,
+                    currentSpeed: locationManager.speed,
+                    totalDistance: locationManager.currentDistance,
+                    onStartRecording: {
                         locationManager.startRecording(
-                            driverName: settings.driverName,
-                            tyreType: settings.tyreType
+                            driverName: driverName,
+                            tyreType: selectedTyreType
                         )
-                    }) {
-                        Label("Start Recording", systemImage: "record.circle")
-                            .font(.title)
-                            .foregroundColor(.green)
+                    },
+                    onStopRecording: {
+                        locationManager.stopRecording()
                     }
+                )
+                .tabItem {
+                    Label("Record", systemImage: "record.circle")
                 }
+                .tag(0)
                 
-                Spacer()
+                DashboardView()
+                    .tabItem {
+                        Label("Dashboard", systemImage: "chart.bar")
+                    }
+                    .tag(1)
             }
-            .padding()
-            .navigationTitle("Transporter Telemetry")
+            .environmentObject(locationManager)
+            .sheet(isPresented: $showingSettings) {
+                NavigationStack {
+                    SettingsView(
+                        driverName: $driverName,
+                        selectedTyreType: $selectedTyreType
+                    )
+                    .environmentObject(locationManager)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingSettings = true }) {
@@ -47,8 +55,12 @@ struct ContentView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView(settings: $settings)
+        .onAppear {
+            locationManager.requestAuthorization()
         }
     }
-} 
+}
+
+#Preview {
+    ContentView()
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to track your driving sessions and provide accurate speed and distance measurements.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need your location to track your driving sessions even when the app is in the background, ensuring continuous and accurate data collection.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location to track your driving sessions even when the app is in the background, ensuring continuous and accurate data collection.</string>
+</dict>
+</plist>

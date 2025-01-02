@@ -29,9 +29,22 @@
 		222AB0D92D25BE250021B19A /* TransporterTelemetryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TransporterTelemetryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		222AB1002D25C10E0021B19A /* Exceptions for "TransporterTelemetry" folder in "TransporterTelemetry" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 222AB0BE2D25BE240021B19A /* TransporterTelemetry */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		222AB0C12D25BE240021B19A /* TransporterTelemetry */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				222AB1002D25C10E0021B19A /* Exceptions for "TransporterTelemetry" folder in "TransporterTelemetry" target */,
+			);
 			path = TransporterTelemetry;
 			sourceTree = "<group>";
 		};
@@ -43,6 +56,21 @@
 		222AB0DC2D25BE250021B19A /* TransporterTelemetryUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TransporterTelemetryUITests;
+			sourceTree = "<group>";
+		};
+		222AB0EC2D25BE330021B19A /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		222AB0ED2D25BE3C0021B19A /* Managers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		222AB0EE2D25BE430021B19A /* Views */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +103,9 @@
 		222AB0B62D25BE240021B19A = {
 			isa = PBXGroup;
 			children = (
+				222AB0EE2D25BE430021B19A /* Views */,
+				222AB0ED2D25BE3C0021B19A /* Managers */,
+				222AB0EC2D25BE330021B19A /* Models */,
 				222AB0C12D25BE240021B19A /* TransporterTelemetry */,
 				222AB0D22D25BE250021B19A /* TransporterTelemetryTests */,
 				222AB0DC2D25BE250021B19A /* TransporterTelemetryUITests */,
@@ -109,6 +140,9 @@
 			);
 			fileSystemSynchronizedGroups = (
 				222AB0C12D25BE240021B19A /* TransporterTelemetry */,
+				222AB0EC2D25BE330021B19A /* Models */,
+				222AB0ED2D25BE3C0021B19A /* Managers */,
+				222AB0EE2D25BE430021B19A /* Views */,
 			);
 			name = TransporterTelemetry;
 			packageProductDependencies = (
@@ -399,6 +433,9 @@
 				DEVELOPMENT_TEAM = Y4NCFKA5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TransporterTelemetry/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Transporter Telemetry needs your location to track driving metrics and record your trips while the app is in use.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Transporter Telemetry needs your location to track driving metrics and record your trips, even when the app is in the background.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -411,6 +448,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = daa.TransporterTelemetry;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -428,6 +466,9 @@
 				DEVELOPMENT_TEAM = Y4NCFKA5A4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TransporterTelemetry/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Transporter Telemetry needs your location to track driving metrics and record your trips while the app is in use.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Transporter Telemetry needs your location to track driving metrics and record your trips, even when the app is in the background.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
