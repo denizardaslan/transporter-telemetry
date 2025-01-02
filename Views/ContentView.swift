@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var showingSettings = false
     @State private var driverName: String = UserDefaults.standard.string(forKey: "DriverName") ?? ""
     @State private var selectedTyreType: TyreType = .summer
+    @State private var carModel: String = UserDefaults.standard.string(forKey: "CarModel") ?? ""
     
     var body: some View {
         NavigationStack {
@@ -42,7 +43,8 @@ struct ContentView: View {
                 NavigationStack {
                     SettingsView(
                         driverName: $driverName,
-                        selectedTyreType: $selectedTyreType
+                        selectedTyreType: $selectedTyreType,
+                        carModel: $carModel
                     )
                     .environmentObject(locationManager)
                 }
