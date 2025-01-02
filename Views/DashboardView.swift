@@ -3,9 +3,11 @@ import SwiftUI
 struct SessionsView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var sessions: [DrivingSession] = []
+    @State private var selectedSessions: Set<UUID> = []
+    @Environment(\.displayScale) private var displayScale
     
     var body: some View {
-        List {
+        List(selection: $selectedSessions) {
             Section("Statistics") {
                 StatCard(title: "Total Sessions", value: "\(sessions.count)")
                 StatCard(title: "Total Distance", value: String(format: "%.1f km", totalDistance))
@@ -19,25 +21,36 @@ struct SessionsView: View {
                 } else {
                     ForEach(sessions) { session in
                         SessionRow(session: session)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    deleteSession(session)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                
-                                Button {
-                                    shareSession(session)
-                                } label: {
-                                    Label("Share", systemImage: "square.and.arrow.up")
-                                }
-                                .tint(.blue)
-                            }
                     }
                 }
             }
         }
         .navigationTitle("Sessions")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                EditButton()
+            }
+            
+            if !selectedSessions.isEmpty {
+                ToolbarItem(placement: .bottomBar) {
+                    HStack {
+                        Button(role: .destructive) {
+                            deleteSessions(selectedSessions)
+                        } label: {
+                            Label("Delete Selected", systemImage: "trash")
+                        }
+                        
+                        Spacer()
+                        
+                        Button {
+                            shareSessions(selectedSessions)
+                        } label: {
+                            Label("Share Selected", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                }
+            }
+        }
         .onAppear {
             loadSessions()
         }
@@ -61,10 +74,25 @@ struct SessionsView: View {
         }
     }
     
-    private func shareSession(_ session: DrivingSession) {
+    private func deleteSessions(_ sessionIds: Set<UUID>) {
         do {
-            let jsonData = try JSONEncoder().encode(session)
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(session.name).json")
+            for id in sessionIds {
+                try DataManager.shared.deleteSession(id: id)
+            }
+            selectedSessions.removeAll()
+            loadSessions()
+        } catch {
+            print("Error deleting sessions: \(error)")
+        }
+    }
+    
+    private func shareSessions(_ sessionIds: Set<UUID>) {
+        do {
+            let selectedSessions = sessions.filter { sessionIds.contains($0.id) }
+            let jsonData = try JSONEncoder().encode(selectedSessions)
+            
+            // Create a temporary file with all selected sessions
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("sessions_export.json")
             try jsonData.write(to: tempURL)
             
             let activityVC = UIActivityViewController(
@@ -75,19 +103,14 @@ struct SessionsView: View {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first,
                let rootViewController = window.rootViewController {
-                rootViewController.present(activityVC, animated: true)
+                if let presentedVC = rootViewController.presentedViewController {
+                    presentedVC.present(activityVC, animated: true)
+                } else {
+                    rootViewController.present(activityVC, animated: true)
+                }
             }
         } catch {
-            print("Error sharing session: \(error)")
-        }
-    }
-    
-    private func deleteSession(_ session: DrivingSession) {
-        do {
-            try DataManager.shared.deleteSession(id: session.id)
-            loadSessions()
-        } catch {
-            print("Error deleting session: \(error)")
+            print("Error sharing sessions: \(error)")
         }
     }
 }
