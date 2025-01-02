@@ -3,6 +3,8 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var sessions: [DrivingSession] = []
+    @State private var sessionToRename: DrivingSession?
+    @State private var newSessionName: String = ""
     
     var body: some View {
         List {
@@ -19,6 +21,28 @@ struct DashboardView: View {
                 } else {
                     ForEach(sessions) { session in
                         SessionRow(session: session)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteSession(session)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                Button {
+                                    sessionToRename = session
+                                    newSessionName = session.name
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
+                                }
+                                .tint(.orange)
+                                
+                                Button {
+                                    shareSession(session)
+                                } label: {
+                                    Label("Share", systemImage: "square.and.arrow.up")
+                                }
+                                .tint(.blue)
+                            }
                     }
                 }
             }
@@ -26,6 +50,24 @@ struct DashboardView: View {
         .navigationTitle("Dashboard")
         .onAppear {
             loadSessions()
+        }
+        .sheet(item: $sessionToRename) { session in
+            NavigationStack {
+                Form {
+                    TextField("Session Name", text: $newSessionName)
+                }
+                .navigationTitle("Rename Session")
+                .navigationBarItems(
+                    leading: Button("Cancel") {
+                        sessionToRename = nil
+                    },
+                    trailing: Button("Save") {
+                        renameSession(session)
+                        sessionToRename = nil
+                    }
+                )
+            }
+            .presentationDetents([.height(200)])
         }
     }
     
@@ -42,6 +84,47 @@ struct DashboardView: View {
             sessions = try DataManager.shared.loadSessions()
         } catch {
             print("Error loading sessions: \(error)")
+        }
+    }
+    
+    private func shareSession(_ session: DrivingSession) {
+        do {
+            let jsonData = try JSONEncoder().encode(session)
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(session.name).json")
+            try jsonData.write(to: tempURL)
+            
+            let activityVC = UIActivityViewController(
+                activityItems: [tempURL],
+                applicationActivities: nil
+            )
+            
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first,
+               let rootViewController = window.rootViewController {
+                rootViewController.present(activityVC, animated: true)
+            }
+        } catch {
+            print("Error sharing session: \(error)")
+        }
+    }
+    
+    private func deleteSession(_ session: DrivingSession) {
+        do {
+            try DataManager.shared.deleteSession(id: session.id)
+            loadSessions()
+        } catch {
+            print("Error deleting session: \(error)")
+        }
+    }
+    
+    private func renameSession(_ session: DrivingSession) {
+        do {
+            var updatedSession = session
+            updatedSession.name = newSessionName
+            try DataManager.shared.updateSession(updatedSession)
+            loadSessions()
+        } catch {
+            print("Error renaming session: \(error)")
         }
     }
 }

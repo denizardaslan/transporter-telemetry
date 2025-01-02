@@ -30,7 +30,9 @@ final class DataManager {
             let data = try encoder.encode(session)
             let fileURL = documentsDirectory.appendingPathComponent("\(session.id).json")
             try data.write(to: fileURL)
+            print("Session saved to: \(fileURL.path)")
         } catch {
+            print("Error encoding session: \(error)")
             throw DataManagerError.encodingError
         }
     }
@@ -50,15 +52,26 @@ final class DataManager {
                                                              includingPropertiesForKeys: nil,
                                                              options: .skipsHiddenFiles)
             
+            print("Found \(fileURLs.count) files in documents directory")
+            
             for fileURL in fileURLs where fileURL.pathExtension == "json" {
-                let data = try Data(contentsOf: fileURL)
-                let session = try decoder.decode(DrivingSession.self, from: data)
-                sessions.append(session)
+                do {
+                    let data = try Data(contentsOf: fileURL)
+                    let session = try decoder.decode(DrivingSession.self, from: data)
+                    sessions.append(session)
+                    print("Successfully loaded session from: \(fileURL.lastPathComponent)")
+                } catch {
+                    print("Error decoding session at \(fileURL.lastPathComponent): \(error)")
+                    // Continue loading other sessions even if one fails
+                    continue
+                }
             }
         } catch {
+            print("Error reading directory: \(error)")
             throw DataManagerError.decodingError
         }
         
+        print("Successfully loaded \(sessions.count) sessions")
         return sessions
     }
     
@@ -69,5 +82,12 @@ final class DataManager {
         
         let fileURL = documentsDirectory.appendingPathComponent("\(id).json")
         try fileManager.removeItem(at: fileURL)
+    }
+    
+    func updateSession(_ session: DrivingSession) throws {
+        // First delete the old session file
+        try deleteSession(id: session.id)
+        // Then save the updated session
+        try saveSession(session)
     }
 } 

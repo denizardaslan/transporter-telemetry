@@ -80,8 +80,13 @@ final class LocationManager: NSObject, ObservableObject {
         
         // Save session using DataManager
         Task {
-            try? await Task.yield()  // Ensure we're not blocking the main thread
-            try? DataManager.shared.saveSession(session)
+            do {
+                try await Task.yield()  // Ensure we're not blocking the main thread
+                try DataManager.shared.saveSession(session)
+                print("Successfully saved session: \(session.id)")
+            } catch {
+                print("Failed to save session: \(error)")
+            }
         }
         
         // Reset state
