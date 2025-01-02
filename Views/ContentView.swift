@@ -32,9 +32,9 @@ struct ContentView: View {
                 }
                 .tag(0)
                 
-                DashboardView()
+                SessionsView()
                     .tabItem {
-                        Label("Dashboard", systemImage: "chart.bar")
+                        Label("Sessions", systemImage: "chart.bar")
                     }
                     .tag(1)
             }

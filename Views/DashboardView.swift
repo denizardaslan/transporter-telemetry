@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct DashboardView: View {
+struct SessionsView: View {
     @EnvironmentObject var locationManager: LocationManager
     @State private var sessions: [DrivingSession] = []
     
@@ -37,7 +37,7 @@ struct DashboardView: View {
                 }
             }
         }
-        .navigationTitle("Dashboard")
+        .navigationTitle("Sessions")
         .onAppear {
             loadSessions()
         }
@@ -53,7 +53,9 @@ struct DashboardView: View {
     
     private func loadSessions() {
         do {
+            // Load and sort sessions from newest to oldest
             sessions = try DataManager.shared.loadSessions()
+                .sorted { $0.session_start > $1.session_start }
         } catch {
             print("Error loading sessions: \(error)")
         }
@@ -116,55 +118,51 @@ struct SessionRow: View {
         return "\(start) → \(end)"
     }
     
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                // Date and Time
-                Text(formattedDateTime)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                
-                // Location info
-                Text(locationDescription)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                
-                // Stats
-                HStack {
-                    Label(
-                        String(format: "%.1f km", session.totalDistance / 1000),
-                        systemImage: "speedometer"
-                    )
-                    
-                    Spacer()
-                    
-                    Label(
-                        String(format: "%.1f km/h", session.maxSpeed),
-                        systemImage: "gauge.with.dots.needle.bottom.50percent"
-                    )
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.vertical, 4)
+    private var formattedDate: String {
+        let date = Date(timeIntervalSince1970: session.session_start)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy HH:mm"
+        return formatter.string(from: date)
     }
     
-    private var formattedDateTime: String {
-        let date = Date(timeIntervalSince1970: session.session_start)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.timeStyle = .short
-        
-        return "\(dateFormatter.string(from: date)) at \(timeFormatter.string(from: date))"
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(formattedDate)
+                    .font(.headline)
+                Spacer()
+                Text(session.driverName ?? "Unknown Driver")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Text(locationDescription)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            
+            HStack {
+                HStack(spacing: 2) {
+                    Image(systemName: "ruler")
+                    Text(String(format: "%.1f km", session.totalDistance / 1000))
+                }
+                
+                Spacer()
+                
+                HStack(spacing: 2) {
+                    Image(systemName: "speedometer")
+                    Text(String(format: "%.0f km/h", session.maxSpeed))
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
     }
 }
 
 #Preview {
     NavigationStack {
-        DashboardView()
+        SessionsView()
             .environmentObject(LocationManager())
     }
 }
