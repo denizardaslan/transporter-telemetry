@@ -5,7 +5,13 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showingSettings = false
     @State private var driverName: String = UserDefaults.standard.string(forKey: "DriverName") ?? ""
-    @State private var selectedTyreType: TyreType = .summer
+    @State private var selectedTyreType: TyreType = {
+        if let savedType = UserDefaults.standard.string(forKey: "TyreType"),
+           let tyreType = TyreType(rawValue: savedType) {
+            return tyreType
+        }
+        return .summer
+    }()
     @State private var carModel: String = UserDefaults.standard.string(forKey: "CarModel") ?? ""
     
     var body: some View {

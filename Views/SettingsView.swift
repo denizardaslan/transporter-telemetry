@@ -30,6 +30,9 @@ struct SettingsView: View {
                             .tag(type)
                     }
                 }
+                .onChange(of: selectedTyreType) { newValue in
+                    UserDefaults.standard.set(newValue.rawValue, forKey: "TyreType")
+                }
             }
         }
         .navigationTitle("Settings")
