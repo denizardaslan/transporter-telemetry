@@ -1,5 +1,6 @@
 import CoreLocation
 import Combine
+import UIKit
 
 @MainActor
 final class LocationManager: NSObject, ObservableObject {
@@ -55,6 +56,9 @@ final class LocationManager: NSObject, ObservableObject {
     func startRecording(driverName: String?, tyreType: TyreType) {
         guard !isRecording else { return }
         
+        // Prevent screen from timing out during recording
+        UIApplication.shared.isIdleTimerDisabled = true
+        
         // Reset recording state
         self.driverName = driverName
         self.tyreType = tyreType
@@ -101,6 +105,9 @@ final class LocationManager: NSObject, ObservableObject {
         
         locationManager.stopUpdatingLocation()
         isRecording = false
+        
+        // Re-enable screen timeout when recording stops
+        UIApplication.shared.isIdleTimerDisabled = false
         
         // Store final data
         let finalData = drivingPoints
