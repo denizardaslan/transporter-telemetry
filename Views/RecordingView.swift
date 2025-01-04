@@ -177,10 +177,6 @@ struct RecordingView: View {
     private func updateSpeedGraph(_ speed: Double) {
         let now = Date()
         speedPoints.append(SpeedDataPoint(timestamp: now, speed: speed))
-        
-        // Keep only last 60 seconds of data
-        let cutoffDate = now.addingTimeInterval(-60)
-        speedPoints.removeAll { $0.timestamp < cutoffDate }
     }
 }
 
