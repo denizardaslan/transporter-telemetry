@@ -117,14 +117,17 @@ struct SessionsView: View {
     private func shareSessions(_ sessionIds: Set<UUID>) {
         do {
             let selectedSessions = sessions.filter { sessionIds.contains($0.id) }
-            let jsonData = try JSONEncoder().encode(selectedSessions)
             
-            // Create a temporary file with all selected sessions
-            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("sessions_export.json")
-            try jsonData.write(to: tempURL)
+            // Create individual JSON files for each session
+            let tempURLs = try selectedSessions.map { session -> URL in
+                let jsonData = try JSONEncoder().encode(session)
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("session_\(session.id).json")
+                try jsonData.write(to: tempURL)
+                return tempURL
+            }
             
             let activityVC = UIActivityViewController(
-                activityItems: [tempURL],
+                activityItems: tempURLs,
                 applicationActivities: nil
             )
             
