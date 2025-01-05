@@ -9,11 +9,12 @@ struct DrivingSession: Codable, Identifiable {
     let data: [DrivingPoint]
     let tyreType: TyreType
     let driverName: String?
+    let carModel: String?
     let startLocation: LocationInfo?
     let endLocation: LocationInfo?
     
     enum CodingKeys: String, CodingKey {
-        case id, session_id, session_start, session_end, data, tyreType, driverName, startLocation, endLocation
+        case id, session_id, session_start, session_end, data, tyreType, driverName, carModel, startLocation, endLocation
     }
     
     init(from decoder: Decoder) throws {
@@ -25,6 +26,7 @@ struct DrivingSession: Codable, Identifiable {
         data = try container.decode([DrivingPoint].self, forKey: .data)
         tyreType = try container.decode(TyreType.self, forKey: .tyreType)
         driverName = try container.decodeIfPresent(String.self, forKey: .driverName)
+        carModel = try container.decodeIfPresent(String.self, forKey: .carModel)
         startLocation = try container.decodeIfPresent(LocationInfo.self, forKey: .startLocation)
         endLocation = try container.decodeIfPresent(LocationInfo.self, forKey: .endLocation)
     }
@@ -36,6 +38,7 @@ struct DrivingSession: Codable, Identifiable {
          data: [DrivingPoint], 
          tyreType: TyreType, 
          driverName: String? = nil,
+         carModel: String? = nil,
          startLocation: LocationInfo? = nil,
          endLocation: LocationInfo? = nil) {
         self.id = id
@@ -45,6 +48,7 @@ struct DrivingSession: Codable, Identifiable {
         self.data = data
         self.tyreType = tyreType
         self.driverName = driverName
+        self.carModel = carModel
         self.startLocation = startLocation
         self.endLocation = endLocation
     }

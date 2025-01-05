@@ -27,6 +27,7 @@ final class LocationManager: NSObject, ObservableObject {
     private var driverName: String?
     private var tyreType: TyreType?
     private var sessionId = 0
+    private var carModel: String?
     
     // MARK: - Initialization
     override init() {
@@ -69,6 +70,9 @@ final class LocationManager: NSObject, ObservableObject {
         self.sessionId += 1
         self.startLocation = nil
         self.endLocation = nil
+        
+        // Get car model from UserDefaults
+        self.carModel = UserDefaults.standard.string(forKey: "CarModel")
         
         // Start by getting current location
         if let location = currentLocation {
@@ -115,6 +119,7 @@ final class LocationManager: NSObject, ObservableObject {
         let finalStartTime = recordingStartTime
         let finalTyreType = tyreType
         let finalDriverName = driverName
+        let finalCarModel = carModel
         let finalStartLocation = startLocation
         
         // Get end location
@@ -132,6 +137,7 @@ final class LocationManager: NSObject, ObservableObject {
                     data: finalData,
                     tyreType: finalTyreType ?? .summer,
                     driverName: finalDriverName,
+                    carModel: finalCarModel,
                     startLocation: finalStartLocation,
                     endLocation: locationInfo
                 )
